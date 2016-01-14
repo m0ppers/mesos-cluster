@@ -16,7 +16,8 @@ if [ "$?" != "0" ]; then
   exit 98
 fi
 
-CLUSTER_WORK_DIR=$CLUSTER_BASE_DIR/`hostname`
+HOSTNAME=`hostname`
+CLUSTER_WORK_DIR=$CLUSTER_BASE_DIR/$HOSTNAME
 IP=$(hostname --ip-address)
 
 
@@ -59,6 +60,20 @@ command=mesos-slave --no-hostname_lookup --master=zk://$IP:2181/mesos --containe
 EOF
   let slave_port=slave_port+1000
 done
+
+cat << EOF >/stop.sh
+#!/bin/sh
+supervisorctl shutdown
+for i in /data/mesos-cluster/$HOSTNAME/mesos-slave-*/meta/slaves/latest; do
+  SLAVE_NAME=\$(readlink \$i | xargs basename)
+  docker rm -f \$(docker ps | grep \$SLAVE_NAME | cut -f1 -d " ") 2>&1 > /dev/null &
+done
+rm -rf /data/mesos-cluster/$HOSTNAME &
+wait
+exit 0
+EOF
+chmod +x /stop.sh
+
 supervisord -c /etc/supervisor/supervisord.conf
 supervisorctl start mesos-master
 for i in `seq $1`; do
@@ -66,5 +81,6 @@ for i in `seq $1`; do
 done
 supervisorctl start marathon
 
-tail -f /var/log/supervisor/*
-
+trap '/bin/bash /stop.sh && exit 0' SIGINT SIGTERM
+tail -f /var/log/supervisor/* &
+wait
