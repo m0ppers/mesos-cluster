@@ -30,15 +30,11 @@ mkdir -p "$CLUSTER_WORK_DIR"/mesos-master || exit 1
 
 cat << EOF >/etc/supervisor/conf.d/mesos-master.conf
 [program:mesos-master]
-autostart=false
-startsecs=3
 command=mesos-master --no-hostname_lookup --zk=zk://$IP:2181/mesos --port=5050 --quorum=1 --registry=in_memory --roles=arangodb --work_dir=$CLUSTER_WORK_DIR/mesos-master
 EOF
 
 cat << EOF >/etc/supervisor/conf.d/marathon.conf
 [program:marathon]
-autostart=false
-startsecs=1
 command=marathon --master zk://$IP:2181/mesos --zk zk://$IP:2181/marathon --logging_level warn
 EOF
 
@@ -54,8 +50,6 @@ for i in `seq $1`; do
   iptables -t nat -A POSTROUTING  -j MASQUERADE
   cat << EOF >/etc/supervisor/conf.d/mesos-slave-"$i".conf
 [program:mesos-slave-$i]
-autostart=false
-startsecs=1
 command=mesos-slave --no-hostname_lookup --master=zk://$IP:2181/mesos --containerizers=docker --port=$slave_port --work_dir=$SLAVE_DIR --resources=mem(*):4096;disk(*):32768;cpus(*):4;ports(*):[$slave_resource_start_port-$slave_resource_end_port]
 EOF
   let slave_port=slave_port+1000
@@ -66,7 +60,7 @@ cat << EOF >/stop.sh
 supervisorctl shutdown
 for i in /data/mesos-cluster/$HOSTNAME/mesos-slave-*/meta/slaves/latest; do
   SLAVE_NAME=\$(readlink \$i | xargs basename)
-  docker rm -f \$(docker ps | grep \$SLAVE_NAME | cut -f1 -d " ") 2>&1 > /dev/null &
+  docker rm -f \$(docker ps | grep \$SLAVE_NAME | cut -f1 -d " ") &> /dev/null &
 done
 rm -rf /data/mesos-cluster/$HOSTNAME &
 wait
@@ -75,11 +69,6 @@ EOF
 chmod +x /stop.sh
 
 supervisord -c /etc/supervisor/supervisord.conf
-supervisorctl start mesos-master
-for i in `seq $1`; do
-  supervisorctl start mesos-slave-"$i"
-done
-supervisorctl start marathon
 
 trap '/bin/bash /stop.sh && exit 0' SIGINT SIGTERM
 tail -f /var/log/supervisor/* &
