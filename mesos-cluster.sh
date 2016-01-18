@@ -38,6 +38,8 @@ cat << EOF >/etc/supervisor/conf.d/marathon.conf
 command=marathon --master zk://$IP:2181/mesos --zk zk://$IP:2181/marathon --logging_level warn
 EOF
 
+SLAVE_RESOURCES=$(/distribute-slave-resources $1 $CLUSTER_BASE_DIR/$HOSTNAME)
+
 let slave_port=31000
 for i in `seq $1`; do
   SLAVE_DIR=$CLUSTER_WORK_DIR/mesos-slave-"$i"
@@ -48,7 +50,7 @@ for i in `seq $1`; do
   iptables -t nat -A OUTPUT -p tcp -d $IP --dport $slave_resource_start_port:$slave_resource_end_port -j DNAT --to-destination $HOSTIP
   cat << EOF >/etc/supervisor/conf.d/mesos-slave-"$i".conf
 [program:mesos-slave-$i]
-command=mesos-slave --no-hostname_lookup --master=zk://$IP:2181/mesos --containerizers=docker --port=$slave_port --work_dir=$SLAVE_DIR --resources=mem(*):4096;disk(*):32768;cpus(*):4;ports(*):[$slave_resource_start_port-$slave_resource_end_port]
+command=mesos-slave --no-hostname_lookup --master=zk://$IP:2181/mesos --containerizers=docker --port=$slave_port --work_dir=$SLAVE_DIR --resources="$SLAVE_RESOURCES";ports(*):[$slave_resource_start_port-$slave_resource_end_port]
 EOF
   let slave_port=slave_port+1000
 done
