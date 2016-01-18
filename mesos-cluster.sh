@@ -46,14 +46,14 @@ for i in `seq $1`; do
   let slave_resource_end_port=slave_resource_start_port+998
   iptables -t nat -A PREROUTING -p tcp -d $IP --dport $slave_resource_start_port:$slave_resource_end_port -j DNAT --to-destination $HOSTIP
   iptables -t nat -A OUTPUT -p tcp -d $IP --dport $slave_resource_start_port:$slave_resource_end_port -j DNAT --to-destination $HOSTIP
-  # XXX don't get it :S
-  iptables -t nat -A POSTROUTING  -j MASQUERADE
   cat << EOF >/etc/supervisor/conf.d/mesos-slave-"$i".conf
 [program:mesos-slave-$i]
 command=mesos-slave --no-hostname_lookup --master=zk://$IP:2181/mesos --containerizers=docker --port=$slave_port --work_dir=$SLAVE_DIR --resources=mem(*):4096;disk(*):32768;cpus(*):4;ports(*):[$slave_resource_start_port-$slave_resource_end_port]
 EOF
   let slave_port=slave_port+1000
 done
+# XXX don't get it :S i am unable to limit that on our portrange...it's been too long
+iptables -t nat -A POSTROUTING  -j MASQUERADE
 
 cat << EOF >/stop.sh
 #!/bin/sh
