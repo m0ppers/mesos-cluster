@@ -20,7 +20,7 @@ RUN echo "deb http://repos.mesosphere.io/ubuntu vivid main" > /etc/apt/sources.l
 RUN curl -so /usr/bin/docker https://get.docker.com/builds/Linux/x86_64/docker-1.9.1 && chmod +x /usr/bin/docker
 
 RUN rm -rf /var/lib/apt/lists/*
-ADD ./distribute-slave-resources /distribute-slave-resources
-ADD ./mesos-cluster.sh /mesos-cluster.sh
+ADD ./container/distribute-slave-resources /distribute-slave-resources
+ADD ./container/mesos-cluster.sh /mesos-cluster.sh
 
 ENTRYPOINT ["/mesos-cluster.sh"]
