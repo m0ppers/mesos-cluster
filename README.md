@@ -12,7 +12,18 @@ to enable local mesos cluster testing, namely:
    
 In fact this project is partly built on the great efforts of the minimesos guys.
    
-TODO: list pros and cons
+This (opinionated) cluster has the following features:
+
+   - supports starting bridged or host networked docker containers via the mesos docker executor
+   - start as many slaves as you want directly via command line
+   - fast startup
+   - docker containers will start on the host (flat docker setup. No docker in docker)
+
+## Prerequisites
+
+If you are launching host networked docker containers mesos will by default use your hostname to determine the IP to bind to.
+Make sure your hostname resolves to an IP which is routable for the mesos-cluster docker container. By default your hostname might resolve to 127.0.0.1 which is of course not reachable from the mesos-master inside the docker container.
+In that case either hardcode your hostname inside /etc/hosts or use something like nss-myhostname.
 
 ## Usage
 
@@ -35,4 +46,14 @@ I am starting my cluster this way:
 ./start-cluster.sh /data/mesos-cluster/ --num-slaves=5 --rm --name mesos-cluster
 ```
 
-This way I can always access my cluster via `mesos-cluster` and it will automatically clean itself up after stopping :)
+This way I can always access my cluster via `docker exec -it mesos-cluster bash` and it will automatically clean itself up after stopping :)
+
+To find out the IP of your docker cluster issue a
+
+```
+docker inspect <container-id|container-name> | grep "IPAddress\"" | tail -n1
+```
+
+The Marathon webinterface will be reachable on port 8080
+
+The Mesos Master webinterface will be reachable on port 5050
