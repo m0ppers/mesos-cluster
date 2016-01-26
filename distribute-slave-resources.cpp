@@ -16,7 +16,7 @@ unsigned int get_memory() {
   if (mem_cgroup) {
     mem_cgroup >> memory;
   }
-  
+  // mop: the number seems to be some magic INFINITY indicator...check for available memory traditionally in that case 
   if (memory == 0 || memory == 0x7FFFFFFFFFFFF000) {
     struct sysinfo info;
     if (sysinfo(&info) != 0) {
