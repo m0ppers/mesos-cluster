@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <unistd.h>
 #include <sstream>
@@ -6,6 +7,25 @@
 #include <sys/statvfs.h>
 
 using namespace std;
+
+unsigned int get_memory() {
+  unsigned long long memory = 0;
+  ifstream mem_cgroup;
+  mem_cgroup.open("/sys/fs/cgroup/memory/memory.limit_in_bytes", ifstream::in);
+  
+  if (mem_cgroup) {
+    mem_cgroup >> memory;
+  }
+  
+  if (memory == 0 || memory == 0x7FFFFFFFFFFFF000) {
+    struct sysinfo info;
+    if (sysinfo(&info) != 0) {
+      return 0;
+    }
+    memory = info.totalram * info.mem_unit;
+  }
+  return memory / 1024 / 1024;
+}
 
 int main(int argc, char** argv) {
   if (argc < 3) {
@@ -32,13 +52,12 @@ int main(int argc, char** argv) {
   }
   diskfree = stat.f_bsize * stat.f_bfree / 1024 / 1024;
   
-  long memory; 
-  struct sysinfo info;
-  if (sysinfo(&info) != 0) {
-    cerr << "Couldn't get sysinfo" << endl;
+  unsigned int memory = get_memory();
+
+  if (memory == 0) {
+    cerr << "Couldn't determine memory" << endl;
     return -2;
   }
-  memory = info.freeram * info.mem_unit / 1024 / 1024;
   
   long cpus = sysconf(_SC_NPROCESSORS_ONLN);
 
