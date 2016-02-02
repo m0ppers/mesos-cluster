@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$#" -lt 1 ]; then
   echo "Usage: $0 <mesos-cluster-workdir> [--num-slaves=<num-slaves>] [--port-range=<port-range>] [<additional-docker-options>]"
@@ -51,4 +51,4 @@ fi
 
 DOCKER_SOCKET=${DOCKER_SOCKET:-'/var/run/docker.sock'}
 
-docker -H unix://"$DOCKER_SOCKET" run --privileged -v "$DOCKER_SOCKET":"$DOCKER_SOCKET" -v "$WORKDIR":"$WORKDIR" $@ m0ppers/mesos-cluster $NUM_SLAVES $HOST_IP $PORT_RANGE /data/mesos-cluster
+docker -H unix://"$DOCKER_SOCKET" run --privileged -v "$DOCKER_SOCKET":"$DOCKER_SOCKET" -v "$WORKDIR":"$WORKDIR" $@ m0ppers/mesos-cluster $NUM_SLAVES $HOST_IP $PORT_RANGE $WORKDIR

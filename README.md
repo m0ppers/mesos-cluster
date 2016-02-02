@@ -32,13 +32,13 @@ git clone https://github.com/m0ppers/mesos-cluster.git
 cd mesos-cluster
 ./start-cluster.sh
 
-Usage: ./start-cluster.sh <mesos-cluster-workdir> [--num-slaves=<num-slaves>] [<additional-docker-options>]
+Usage: ./start-cluster.sh <mesos-cluster-workdir> [--num-slaves=<num-slaves>] [--port-range=<port-range>] [<additional-docker-options>]
 ```
 
 The whole cluster is sharing a workdir so that the mesos cluster can offer disk resources to tasks on the host.
 It will create a new sub-workdir for each cluster spawned!
 
-Optionally specify `num-slaves` and any options to pipe through to the docker daemon.
+Optionally specify `--num-slaves and --port-range` and any options to pipe through to the docker daemon.
 
 I am starting my cluster this way:
 
