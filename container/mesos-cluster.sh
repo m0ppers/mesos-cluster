@@ -64,11 +64,11 @@ iptables -t nat -A POSTROUTING  -j MASQUERADE
 cat << EOF >/stop.sh
 #!/bin/sh
 supervisorctl shutdown
-for i in /data/mesos-cluster/$HOSTNAME/mesos-slave-*/meta/slaves/latest; do
+for i in $CLUSTER_WORK_DIR/mesos-slave-*/meta/slaves/latest; do
   SLAVE_NAME=\$(readlink \$i | xargs basename)
   docker rm -f \$(docker ps | grep \$SLAVE_NAME | cut -f1 -d " ") &> /dev/null &
 done
-rm -rf /data/mesos-cluster/$HOSTNAME &
+rm -rf $CLUSTER_WORK_DIR &
 wait
 exit 0
 EOF
