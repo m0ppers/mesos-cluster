@@ -30,7 +30,7 @@ mkdir -p "$CLUSTER_WORK_DIR"/mesos-master || exit 1
 
 cat << EOF >/etc/supervisor/conf.d/mesos-master.conf
 [program:mesos-master]
-command=mesos-master --no-hostname_lookup --zk=zk://$IP:2181/mesos --port=5050 --quorum=1 --registry=in_memory --roles=arangodb --work_dir=$CLUSTER_WORK_DIR/mesos-master
+command=mesos-master --no-hostname_lookup --zk=zk://$IP:2181/mesos --port=5050 --quorum=1 --registry=in_memory --work_dir=$CLUSTER_WORK_DIR/mesos-master
 EOF
 
 cat << EOF >/etc/supervisor/conf.d/marathon.conf
@@ -54,7 +54,7 @@ for i in `seq $NUM_SLAVES`; do
   iptables -t nat -A OUTPUT -p tcp -d $IP --dport $slave_resource_start_port:$slave_resource_end_port -j DNAT --to-destination $HOSTIP
   cat << EOF >/etc/supervisor/conf.d/mesos-slave-"$i".conf
 [program:mesos-slave-$i]
-command=mesos-slave --no-hostname_lookup --master=zk://$IP:2181/mesos --containerizers=docker --port=$slave_start_port --work_dir=$SLAVE_DIR --resources="$SLAVE_RESOURCES";ports(*):[$slave_resource_start_port-$slave_resource_end_port]
+command=mesos-slave --no-hostname_lookup --master=zk://$IP:2181/mesos --containerizers=docker --port=$slave_start_port --work_dir=$SLAVE_DIR --no-systemd_enable_support --resources="$SLAVE_RESOURCES";ports(*):[$slave_resource_start_port-$slave_resource_end_port]
 EOF
   let slave_start_port=slave_start_port+num_ports
 done
