@@ -66,7 +66,7 @@ cat << EOF >/stop.sh
 supervisorctl shutdown
 for i in $CLUSTER_WORK_DIR/mesos-slave-*/meta/slaves/latest; do
   SLAVE_NAME=\$(readlink \$i | xargs basename)
-  docker rm -f \$(docker ps | grep \$SLAVE_NAME | cut -f1 -d " ") &> /dev/null &
+  docker rm -f -v \$(docker ps | grep \$SLAVE_NAME | cut -f1 -d " ") &> /dev/null &
 done
 rm -rf $CLUSTER_WORK_DIR &
 wait
