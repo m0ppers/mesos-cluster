@@ -21,6 +21,8 @@ This (opinionated) cluster has the following features:
 
 ## Prerequisites
 
+You need to have a somewhat new Linux which has `ss`. 
+
 If you are launching host networked docker containers mesos will by default use your hostname to determine the IP to bind to.
 Make sure your hostname resolves to an IP which is routable for the mesos-cluster docker container. By default your hostname might resolve to 127.0.0.1 which is of course not reachable from the mesos-master inside the docker container.
 In that case either hardcode your hostname inside /etc/hosts or use something like nss-myhostname.
