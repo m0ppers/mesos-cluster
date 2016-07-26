@@ -17,7 +17,7 @@ RUN echo "deb http://repos.mesosphere.io/ubuntu vivid main" > /etc/apt/sources.l
     apt-get update && \
     apt-get -y install curl mesos marathon
 
-RUN curl -so /usr/bin/docker https://get.docker.com/builds/Linux/x86_64/docker-1.9.1 && chmod +x /usr/bin/docker
+RUN curl -so /usr/bin/docker https://get.docker.com/builds/Linux/x86_64/docker-1.10.3 && chmod +x /usr/bin/docker
 
 RUN rm -rf /var/lib/apt/lists/*
 ADD ./container/distribute-slave-resources /distribute-slave-resources
